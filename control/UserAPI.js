@@ -5,8 +5,9 @@ const { success, fail } = require("../helpers/resposta");
 const UsersDAO = require("../model/User");
 require("dotenv").config();
 
-function validateToken(req, res, next) {
+function validateToken(req, res, next) { 
   const token = req.headers.authorization;
+  console.log('Received token:', token); 
 
   if (!token) {
     return res.status(401).json(fail("Token de autenticação não fornecido"));
@@ -14,9 +15,10 @@ function validateToken(req, res, next) {
 
   jwt.verify(token, process.env.TOKEN_KEY, (err, decoded) => {
     if (err) {
+      console.log('Token verification error:', err); 
       return res.status(401).json(fail("Token de autenticação inválido"));
     }
-    
+
     req.user = decoded;
     next();
   });
@@ -27,7 +29,8 @@ router.post("/login", async (req, res) => {
 
   const user = await UsersDAO.getByLogin(login);
   if (user && user.password === password) {
-    const token = jwt.sign({ login }, process.env.TOKEN_KEY);
+    const token = jwt.sign({ login }, process.env.TOKEN_KEY, { expiresIn: '1h' });
+    console.log('Generated token:', token); // Adicione esta linha para verificar o valor do token gerado
     res.json(success({ token }));
   } else {
     res.status(401).json(fail("Credenciais inválidas"));

@@ -7,6 +7,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use("/users", require("./control/UserAPI"));
+app.use("/chars", require("./control/CharAPI"));
 app.use("/install", require('./control/InstallAPI'));
 
 app.listen(3001, () => {
