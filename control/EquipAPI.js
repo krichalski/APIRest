@@ -1,40 +1,51 @@
-const express = require("express");
-const router = express.Router();
-const jwt = require('jsonwebtoken');
-const { success, fail } = require("../helpers/resposta");
-const EquipDAO = require("../model/Equip");
-require("dotenv").config();
+const express = require("express")
+const router = express.Router()
+const jwt = require('jsonwebtoken')
+const { success, fail } = require("../helpers/resposta")
+const EquipDAO = require("../model/Equip")
+require("dotenv").config()
 
 
 function validateToken(req, res, next) {
-    const token = req.headers.authorization;
-    console.log('Received token:', token);
+    const token = req.headers.authorization
+    console.log('Received token:', token)
   
     if (!token) {
-      return res.status(401).json(fail("Token de autenticação não fornecido"));
+      return res.status(401).json(fail("Token de autenticação não fornecido"))
     }
   
     jwt.verify(token, process.env.TOKEN_KEY, (err, decoded) => {
       if (err) {
         console.log('Token verification error:', err);
-        return res.status(401).json(fail("Token de autenticação inválido"));
+        return res.status(401).json(fail("Token de autenticação inválido"))
       }
   
-      req.user = decoded;
-      next();
-    });
+      req.user = decoded
+      next()
+    })
   }
 
 
 
-router.get("/", (req, res) => {
-    EquipDAO.list().then((equips) => {
-        res.json(success(equips, "listando"));
-    }).catch(err => {
-        console.log(err);
-        res.status(500).json(fail("Erro ao listar os itens"));
-    });
-});
+  router.get("/", validateToken,  async (req, res) => {
+    const limite = parseInt(req.query.limite) 
+    const pagina = parseInt(req.query.pagina) 
+  
+    const startIndex = (pagina - 1) * limite
+    const endIndex = pagina * limite
+  
+    try {
+      const users = await UsersDAO.list()
+  
+      const paginatedUsers = users.slice(startIndex, endIndex)
+  
+      res.json(success(paginatedUsers, "Listando"))
+    } catch (error) {
+      console.error(error)
+      res.status(500).json(fail("Erro ao listar usuários"));
+    }
+  })
+  
 
 router.get("/:id", (req, res) => {
     EquipDAO.getById(req.params.id).then(equip => {

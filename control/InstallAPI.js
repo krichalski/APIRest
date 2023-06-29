@@ -11,15 +11,7 @@ const MissionModel = require('../model/Mission');
 const EquipModel = require('../model/Equip');
 const SkillModel = require('../model/Skill');
 
-function checkAdmin(req, res, next) {
-  const { isAdmin } = req.user;
 
-  if (isAdmin) {
-    next();
-  } else {
-    res.status(403).json(fail("Acesso negado. O usuário não é um administrador."));
-  }
-}
 
 
 function validateToken(req, res, next) {
@@ -55,9 +47,14 @@ router.get('/', validateToken, async (req, res) => {
   await sequelize.sync({ force: true });
 
   let users = [
-    { login: "teste", password: "teste", isAdmin: true },
-    { login: "Gustavo", password: "leozinho123", isAdmin: false }
+    { login: "user1", password: "password2", isAdmin: true },
+    { login: "user2", password: "password2", isAdmin: false },
+    { login: "user3", password: "password3", isAdmin: false },
+    { login: "user4", password: "password4", isAdmin: false },
+    { login: "user5", password: "password5", isAdmin: false },
+    { login: "user6", password: "password6", isAdmin: false }
   ];
+  
 
   let characters = [
     { name: "Rufus Maximos", classe: "Barbaro", nivel: 10 },
@@ -139,7 +136,7 @@ router.get('/', validateToken, async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Erro ao criar usuários, personagens, missões, equipamentos e habilidades" });
+    res.status(500).json({ error: "Erro ao criar o install" });
   }
 });
 

@@ -25,10 +25,25 @@ function validateToken(req, res, next) {
   });
 }
 
-router.get("/", validateToken, async (req, res) => {
-  let characters = await CharDAO.list();
-  res.json(success(characters, "listando"));
-});
+router.get("/", validateToken,  async (req, res) => {
+  const limite = parseInt(req.query.limite) 
+  const pagina = parseInt(req.query.pagina) 
+
+  const startIndex = (pagina - 1) * limite
+  const endIndex = pagina * limite
+
+  try {
+    const users = await CharDAO.list()
+
+    const paginatedUsers = users.slice(startIndex, endIndex)
+
+    res.json(success(paginatedUsers, "Listando"))
+  } catch (error) {
+    console.error(error)
+    res.status(500).json(fail("Erro ao listar usuários"));
+  }
+})
+
 
 router.get("/:id", validateToken, async (req, res) => {
   let character = await CharDAO.getById(req.params.id);
