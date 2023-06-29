@@ -35,19 +35,11 @@ router.get("/", validateToken,  async (req, res) => {
   const endIndex = pagina * limite
 
   try {
-<<<<<<< HEAD
     const skills = await SkillDAO.list()
 
     const paginatedSkills = skills.slice(startIndex, endIndex)
 
     res.json(success(paginatedSkills, "Listando"))
-=======
-    const users = await SkillDAO.list()
-
-    const paginatedUsers = users.slice(startIndex, endIndex)
-
-    res.json(success(paginatedUsers, "Listando"))
->>>>>>> b8987d9fa622fd043245935edf9541be66181795
   } catch (error) {
     console.error(error)
     res.status(500).json(fail("Erro ao listar usuários"));

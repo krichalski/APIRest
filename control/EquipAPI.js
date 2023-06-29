@@ -35,19 +35,11 @@ function validateToken(req, res, next) {
     const endIndex = pagina * limite
   
     try {
-<<<<<<< HEAD
       const equips = await EquipDAO.list()
   
       const paginatedEquips = equips.slice(startIndex, endIndex)
   
       res.json(success(paginatedEquips, "Listando"))
-=======
-      const users = await UsersDAO.list()
-  
-      const paginatedUsers = users.slice(startIndex, endIndex)
-  
-      res.json(success(paginatedUsers, "Listando"))
->>>>>>> b8987d9fa622fd043245935edf9541be66181795
     } catch (error) {
       console.error(error)
       res.status(500).json(fail("Erro ao listar usuários"));
