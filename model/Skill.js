@@ -2,24 +2,25 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../helpers/bd");
 const Char = require("./Char");
 
-const EquipModel = sequelize.define('Equip', {
+const SkillModel = sequelize.define('Skill', {
   name: DataTypes.STRING,
+  descript: DataTypes.STRING,
 });
 
-EquipModel.belongsTo(Char.Model, {
+SkillModel.belongsTo(Char.Model, {
   foreignKey: 'personagem',
 });
 
-Char.Model.hasMany(EquipModel, {
+Char.Model.hasMany(SkillModel, {
   foreignKey: 'personagem',
 });
 
 module.exports = {
   list: async function () {
-    const equips = await EquipModel.findAll({ include: Char.Model });
-    return equips;
+    const skills = await SkillModel.findAll({ include: Char.Model });
+    return skills;
   },
-  save: async function (name, personagem) {
+  save: async function (name, descript, personagem) {
     if (personagem instanceof Char.Model) {
       personagem = personagem.id;
     } else if (typeof personagem === 'string') {
@@ -29,30 +30,32 @@ module.exports = {
       }
       personagem = obj.id;
     }
-    const equip = await EquipModel.create({
+    const skill = await SkillModel.create({
       name: name,
+      descript: descript,
       personagem: personagem,
     });
-    return equip;
+    return skill;
   },
-  update: async (id, name) => {
-    const equip = await EquipModel.findByPk(id);
-    if (!equip) {
+  update: async (id, name, descript) => {
+    const skill = await SkillModel.findByPk(id);
+    if (!skill) {
       return false;
     }
-    await equip.update({
+    await skill.update({
       name: name,
+      descript: descript,
     });
-    return equip;
+    return skill;
   },
   delete: async function (id) {
-    return await EquipModel.destroy({ where: { id: id } });
+    return await SkillModel.destroy({ where: { id: id } });
   },
   getById: async function (id) {
-    return await EquipModel.findByPk(id);
+    return await SkillModel.findByPk(id);
   },
   getByName: async function (name) {
-    return await EquipModel.findOne({ where: { name: name } });
+    return await SkillModel.findOne({ where: { name: name } });
   },
-  Model: EquipModel,
+  Model: SkillModel,
 };

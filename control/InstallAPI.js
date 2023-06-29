@@ -1,13 +1,57 @@
 const express = require("express");
 const router = express.Router();
 const sequelize = require("../helpers/bd");
+require("dotenv").config();
+const jwt = require('jsonwebtoken');
+const { fail, success } = require("../helpers/resposta");
 
 const UserModel = require('../model/User');
 const CharModel = require('../model/Char');
 const MissionModel = require('../model/Mission');
 const EquipModel = require('../model/Equip');
+const SkillModel = require('../model/Skill');
 
-router.get('/', async (req, res) => {
+function checkAdmin(req, res, next) {
+  const { isAdmin } = req.user;
+
+  if (isAdmin) {
+    next();
+  } else {
+    res.status(403).json(fail("Acesso negado. O usuário não é um administrador."));
+  }
+}
+
+
+function validateToken(req, res, next) {
+  const token = req.headers.authorization;
+  console.log('Received token:', token);
+
+  if (!token) {
+    return res.status(401).json(fail("Token de autenticação não fornecido"));
+  }
+
+  jwt.verify(token, process.env.TOKEN_KEY, (err, decoded) => {
+    if (err) {
+      console.log('Token verification error:', err);
+      return res.status(401).json(fail("Token de autenticação inválido"));
+    }
+
+    req.user = decoded;
+    next();
+  });
+}
+
+router.get('/initadmin', async (req, res) => {
+  try {
+    const user = await UserModel.save("admin", "admin", true);
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao criar o usuário admin" });
+  }
+});
+
+router.get('/', validateToken, async (req, res) => {
   await sequelize.sync({ force: true });
 
   let users = [
@@ -41,6 +85,15 @@ router.get('/', async (req, res) => {
     { name: "Cajado Arcano", personagem: "Lissandra Aqua" }
   ];
 
+  let skills = [
+    { name: "Ataque Físico", descript: "Ataque físico básico", personagem: "Rufus Maximos" },
+    { name: "Curar", descript: "Habilidade de cura", personagem: "Adrian Rivolus" },
+    { name: "Flecha Flamejante", descript: "Dispara flechas em chamas", personagem: "Joe Silvian" },
+    { name: "Bola de Fogo", descript: "Lança uma bola de fogo", personagem: "Noxus Tristen" },
+    { name: "Golpe Sorrateiro", descript: "Ataque furtivo com adaga", personagem: "Boris Lets" },
+    { name: "Raio de Gelo", descript: "Lança um raio de gelo", personagem: "Lissandra Aqua" }
+  ];
+
   try {
     let createdUsers = [];
     for (let i = 0; i < users.length; i++) {
@@ -70,15 +123,23 @@ router.get('/', async (req, res) => {
       createdEquips.push(createdEquip);
     }
 
+    let createdSkills = [];
+    for (let i = 0; i < skills.length; i++) {
+      let { name, descript, personagem } = skills[i];
+      let createdSkill = await SkillModel.save(name, descript, personagem);
+      createdSkills.push(createdSkill);
+    }
+
     res.json({
       users: createdUsers,
       characters: createdCharacters,
       missions: createdMissions,
-      equips: createdEquips
+      equips: createdEquips,
+      skills: createdSkills
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Erro ao criar usuários, personagens, missões, equipamentos" });
+    res.status(500).json({ error: "Erro ao criar usuários, personagens, missões, equipamentos e habilidades" });
   }
 });
 

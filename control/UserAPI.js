@@ -5,24 +5,57 @@ const { success, fail } = require("../helpers/resposta");
 const UsersDAO = require("../model/User");
 require("dotenv").config();
 
-function validateToken(req, res, next) { 
+function checkAdmin(req, res, next) {
+  const { isAdmin } = req.user;
+
+  console.log('isAdmin:', isAdmin); // Adicionando console.log para verificar o valor de isAdmin
+
+  if (isAdmin) {
+    next();
+  } else {
+    res.status(403).json(fail("Acesso negado. O usuário não é um administrador."));
+  }
+}
+
+
+function validateToken(req, res, next) {
   const token = req.headers.authorization;
-  console.log('Received token:', token); 
+  console.log('Received token:', token);
 
   if (!token) {
     return res.status(401).json(fail("Token de autenticação não fornecido"));
   }
 
-  jwt.verify(token, process.env.TOKEN_KEY, (err, decoded) => {
+  jwt.verify(token, process.env.TOKEN_KEY, async (err, decoded) => {
     if (err) {
-      console.log('Token verification error:', err); 
+      console.log('Token verification error:', err);
       return res.status(401).json(fail("Token de autenticação inválido"));
     }
 
-    req.user = decoded;
-    next();
+    try {
+      
+      const user = await UsersDAO.getByLogin(decoded.login);
+
+      if (!user) {
+        return res.status(401).json(fail("Usuário não encontrado"));
+      }
+
+      
+      req.user = {
+        id: user.id,
+        login: user.login,
+        isAdmin: user.isAdmin
+        // Adicione outras propriedades do usuário conforme necessário
+      };
+
+      next();
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json(fail("Erro ao obter informações do usuário"));
+    }
   });
 }
+
 
 router.post("/login", async (req, res) => {
   const { login, password } = req.body;
@@ -37,7 +70,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/", validateToken, async (req, res) => {
+router.get("/", validateToken,checkAdmin, async (req, res) => {
   let users = await UsersDAO.list();
   res.json(success(users, "listando"));
 });

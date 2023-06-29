@@ -5,6 +5,28 @@ const { success, fail } = require("../helpers/resposta");
 const EquipDAO = require("../model/Equip");
 require("dotenv").config();
 
+
+function validateToken(req, res, next) {
+    const token = req.headers.authorization;
+    console.log('Received token:', token);
+  
+    if (!token) {
+      return res.status(401).json(fail("Token de autenticação não fornecido"));
+    }
+  
+    jwt.verify(token, process.env.TOKEN_KEY, (err, decoded) => {
+      if (err) {
+        console.log('Token verification error:', err);
+        return res.status(401).json(fail("Token de autenticação inválido"));
+      }
+  
+      req.user = decoded;
+      next();
+    });
+  }
+
+
+
 router.get("/", (req, res) => {
     EquipDAO.list().then((equips) => {
         res.json(success(equips, "listando"));
@@ -23,7 +45,7 @@ router.get("/:id", (req, res) => {
     });
 });
 
-router.post("/", (req, res) => {
+router.post("/", validateToken,(req, res) => {
     const { name, personagem } = req.body;
 
     EquipDAO.save(name, personagem).then(equip => {
@@ -34,7 +56,7 @@ router.post("/", (req, res) => {
     });
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id",validateToken, (req, res) => {
     const { id } = req.params;
     const { name, personagem } = req.body;
 
@@ -58,7 +80,7 @@ router.put("/:id", (req, res) => {
     });
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", validateToken,(req, res) => {
     EquipDAO.delete(req.params.id).then(equip => {
         if (equip) {
             res.json(success(equip));

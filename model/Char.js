@@ -21,6 +21,8 @@ const CharModel = sequelize.define("Characters", {
   },
 });
 
+
+
 module.exports = {
   list: async function () {
     const characters = await CharModel.findAll();
