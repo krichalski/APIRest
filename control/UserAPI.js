@@ -87,7 +87,7 @@ router.get("/:id", validateToken, async (req, res) => {
   if (obj) {
     res.json(success(obj))
   } else {
-    res.status(500).json(fail("Não foi possível localizar o usuário"))
+    res.status(500).json(fail("Não foi possível localizar o usuário específico"))
   }
 })
 
@@ -115,11 +115,11 @@ router.post("/admin", validateToken, checkAdmin, async (req, res) => {
     if (obj) {
       res.json(success(obj));
     } else {
-      res.status(500).json(fail("Falha ao salvar o novo usuário"));
+      res.status(500).json(fail("Falha ao salvar o novo administrador"));
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json(fail("Erro ao salvar o novo usuário"));
+    res.status(500).json(fail("Erro ao salvar o novo administrador"));
   }
 });
 
@@ -140,7 +140,7 @@ router.put("/:id", validateToken, async (req, res) => {
   const { login, password, isAdmin } = req.body;
 
   if (req.user.id !== id) {
-    return res.status(401).json(fail("Acesso não autorizado"));
+    return res.status(401).json(fail("Acesso não autorizado você só pode alterar sua conta"));
   }
 
   let result = await UsersDAO.update(id, login, password, isAdmin);
