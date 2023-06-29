@@ -14,40 +14,12 @@ const SkillModel = require('../model/Skill');
 
 
 
-function validateToken(req, res, next) {
-  const token = req.headers.authorization;
-  console.log('Received token:', token);
-
-  if (!token) {
-    return res.status(401).json(fail("Token de autenticação não fornecido"));
-  }
-
-  jwt.verify(token, process.env.TOKEN_KEY, (err, decoded) => {
-    if (err) {
-      console.log('Token verification error:', err);
-      return res.status(401).json(fail("Token de autenticação inválido"));
-    }
-
-    req.user = decoded;
-    next();
-  });
-}
-
-router.get('/initadmin', async (req, res) => {
-  try {
-    const user = await UserModel.save("admin", "admin", true);
-    res.json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao criar o usuário admin" });
-  }
-});
-
-router.get('/', validateToken, async (req, res) => {
+router.get('/', async (req, res) => {
   await sequelize.sync({ force: true });
 
   let users = [
-    { login: "user1", password: "password2", isAdmin: true },
+    { login: "admin", password: "admin", isAdmin: true},
+    { login: "user1", password: "password2", isAdmin: false},
     { login: "user2", password: "password2", isAdmin: false },
     { login: "user3", password: "password3", isAdmin: false },
     { login: "user4", password: "password4", isAdmin: false },

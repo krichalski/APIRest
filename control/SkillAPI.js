@@ -8,7 +8,7 @@ require("dotenv").config();
 
 function validateToken(req, res, next) {
   const token = req.headers.authorization;
-  console.log('Received token:', token);
+  
 
   if (!token) {
     return res.status(401).json(fail("Token de autenticação não fornecido"));
