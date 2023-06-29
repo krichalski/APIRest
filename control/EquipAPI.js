@@ -42,7 +42,7 @@ function validateToken(req, res, next) {
       res.json(success(paginatedEquips, "Listando"))
     } catch (error) {
       console.error(error)
-      res.status(500).json(fail("Erro ao listar usuários"));
+      res.status(500).json(fail("Erro ao listar equipamentos"));
     }
   })
   

@@ -31,14 +31,14 @@ router.get("/", validateToken,  async (req, res) => {
   const endIndex = pagina * limite
 
   try {
-    const missions = await UsersDAO.list()
+    const missions = await MissionDAO.list()
 
     const paginatedMissions = missions.slice(startIndex, endIndex)
 
     res.json(success(paginatedMissions, "Listando"))
   } catch (error) {
     console.error(error)
-    res.status(500).json(fail("Erro ao listar usuários"));
+    res.status(500).json(fail("Erro ao listar missões"));
   }
 })
 
