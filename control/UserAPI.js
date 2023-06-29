@@ -16,9 +16,16 @@ function checkAdmin(req, res, next) {
 
 
 function validateToken(req, res, next) {
+<<<<<<< HEAD
   const token = req.headers.authorization
    if (!token) {
     return res.status(401).json(fail("Token de autenticação não fornecido"))
+=======
+  const token = req.headers.authorization;
+  console.log('Received token:', token);
+   if (!token) {
+    return res.status(401).json(fail("Token de autenticação não fornecido"));
+>>>>>>> b8987d9fa622fd043245935edf9541be66181795
   }
 
   jwt.verify(token, process.env.TOKEN_KEY, async (err, decoded) => {
