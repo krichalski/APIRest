@@ -24,10 +24,25 @@ function validateToken(req, res, next) {
   });
 }
 
-router.get("/", validateToken, async (req, res) => {
-  let missions = await MissionDAO.list();
-  res.json(success(missions, "listando"));
-});
+router.get("/", validateToken,  async (req, res) => {
+  const limite = parseInt(req.query.limite) 
+  const pagina = parseInt(req.query.pagina) 
+
+  const startIndex = (pagina - 1) * limite
+  const endIndex = pagina * limite
+
+  try {
+    const missions = await UsersDAO.list()
+
+    const paginatedMissions = missions.slice(startIndex, endIndex)
+
+    res.json(success(paginatedMissions, "Listando"))
+  } catch (error) {
+    console.error(error)
+    res.status(500).json(fail("Erro ao listar usuários"));
+  }
+})
+
 
 router.get("/:id", validateToken, async (req, res) => {
   let mission = await MissionDAO.getById(req.params.id);

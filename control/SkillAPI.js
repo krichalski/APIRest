@@ -27,16 +27,25 @@ function validateToken(req, res, next) {
 
 
 
-router.get("/", (req, res) => {
-  SkillDAO.list()
-    .then((skills) => {
-      res.json(success(skills, "listando"));
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json(fail("Erro ao listar as habilidades"));
-    });
-});
+router.get("/", validateToken,  async (req, res) => {
+  const limite = parseInt(req.query.limite) 
+  const pagina = parseInt(req.query.pagina) 
+
+  const startIndex = (pagina - 1) * limite
+  const endIndex = pagina * limite
+
+  try {
+    const skills = await SkillDAO.list()
+
+    const paginatedSkills = skills.slice(startIndex, endIndex)
+
+    res.json(success(paginatedSkills, "Listando"))
+  } catch (error) {
+    console.error(error)
+    res.status(500).json(fail("Erro ao listar usuários"));
+  }
+})
+
 
 router.get("/:id", validateToken,(req, res) => {
   SkillDAO.getById(req.params.id)
