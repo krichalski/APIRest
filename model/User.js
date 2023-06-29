@@ -62,4 +62,7 @@ module.exports = {
   getByLogin: async function(login) {
     return await UserModel.findOne({ where: { login: login } });
   },
+
+  Model: UserModel
+
 };

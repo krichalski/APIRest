@@ -59,4 +59,7 @@ module.exports = {
   getByName: async function (name) {
     return await CharModel.findOne({ where: { name: name } });
   },
+
+  Model: CharModel    
+ 
 };

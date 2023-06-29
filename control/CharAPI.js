@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { success, fail } = require("../helpers/resposta");
-const CharModel = require("../model/Char");
+const CharDAO = require("../model/Char");
+const MissionDAO = require("../model/Mission");
 require("dotenv").config();
 
 function validateToken(req, res, next) {
@@ -25,12 +26,12 @@ function validateToken(req, res, next) {
 }
 
 router.get("/", validateToken, async (req, res) => {
-  let characters = await CharModel.list();
-  res.json(success(characters, "list"));
+  let characters = await CharDAO.list();
+  res.json(success(characters, "listando"));
 });
 
 router.get("/:id", validateToken, async (req, res) => {
-  let character = await CharModel.getById(req.params.id);
+  let character = await CharDAO.getById(req.params.id);
   if (character) {
     res.json(success(character));
   } else {
@@ -42,7 +43,7 @@ router.post("/", validateToken, async (req, res) => {
   const { name, classe, nivel } = req.body;
 
   try {
-    let character = await CharModel.save(name, classe, nivel);
+    let character = await CharDAO.save(name, classe, nivel);
     res.json(success(character));
   } catch (error) {
     console.error(error);
@@ -54,7 +55,7 @@ router.put("/:id", validateToken, async (req, res) => {
   const { id } = req.params;
   const { name, classe, nivel } = req.body;
 
-  let result = await CharModel.update(id, name, classe, nivel);
+  let result = await CharDAO.update(id, name, classe, nivel);
   if (result) {
     res.json(success(result));
   } else {
@@ -63,12 +64,46 @@ router.put("/:id", validateToken, async (req, res) => {
 });
 
 router.delete("/:id", validateToken, async (req, res) => {
-  let result = await CharModel.delete(req.params.id);
+  let result = await CharDAO.delete(req.params.id);
   if (result) {
     res.json(success(result));
   } else {
     res.status(500).json(fail("Personagem não encontrado"));
   }
 });
+
+router.get("/quest/:name/:nome", async (req, res) => {
+  const { name, nome } = req.params;
+
+  try {
+    const character = await CharDAO.getByName(name);
+    if (!character) {
+      return res.status(404).json(fail("Personagem não encontrado"));
+    }
+
+    const mission = await MissionDAO.getByName(nome);
+    if (!mission) {
+      return res.status(404).json(fail("Missão não encontrada"));
+    }
+
+    let result = "";
+    if (character.nivel >= mission.nivelDificuldade) {
+      result = "Seu herói completou a missão";
+    } else {
+      result = "Seu herói falhou";
+    }
+
+    const response = {
+      result: result,
+      descricao: mission.descricao
+    };
+
+    return res.json(success(response));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(fail("Erro ao processar a requisição"));
+  }
+});
+
 
 module.exports = router;

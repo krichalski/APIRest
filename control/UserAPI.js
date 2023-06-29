@@ -39,7 +39,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/", validateToken, async (req, res) => {
   let users = await UsersDAO.list();
-  res.json(success(users, "list"));
+  res.json(success(users, "listando"));
 });
 
 router.get("/:id", validateToken, async (req, res) => {
