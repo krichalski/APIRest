@@ -87,33 +87,12 @@ router.delete("/:id", validateToken, async (req, res) => {
   }
 });
 
-router.get("/quest/:name/:nome", async (req, res) => {
-  const { name, nome } = req.params;
+router.get("/quest/:name/:missionName", async (req, res) => {
+  const { name, missionName } = req.params;
 
   try {
-    const character = await CharDAO.getByName(name);
-    if (!character) {
-      return res.status(404).json(fail("Personagem não encontrado"));
-    }
-
-    const mission = await MissionDAO.getByName(nome);
-    if (!mission) {
-      return res.status(404).json(fail("Missão não encontrada"));
-    }
-
-    let result = "";
-    if (character.nivel >= mission.nivelDificuldade) {
-      result = "Seu herói completou a missão";
-    } else {
-      result = "Seu herói falhou";
-    }
-
-    const response = {
-      result: result,
-      descricao: mission.descricao
-    };
-
-    return res.json(success(response));
+    const response = await CharDAO.quest(name, missionName);
+    res.json(success(response));
   } catch (error) {
     console.error(error);
     res.status(500).json(fail("Erro ao processar a requisição"));

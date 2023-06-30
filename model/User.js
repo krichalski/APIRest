@@ -19,6 +19,10 @@ const UserModel = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     
   },
+  contador:{
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  }
 });
 
 module.exports = {
@@ -36,7 +40,7 @@ module.exports = {
     return user;
   },
 
-  update: async (id, login, password, isAdmin) => {
+  update: async (id, login, password, isAdmin, contador) => {
     const user = await UserModel.findByPk(id);
     if (!user) {
       return false;
@@ -46,6 +50,7 @@ module.exports = {
       login: login,
       password: password,
       isAdmin: isAdmin,
+      contador: contador 
     });
 
     return user;
@@ -62,6 +67,16 @@ module.exports = {
   getByLogin: async function(login) {
     return await UserModel.findOne({ where: { login: login } });
   },
+
+  contUser: async function(id) {
+    const user = await UserModel.findByPk(id);
+  
+    user.contador += 1;
+    await user.save();
+  
+    return user;
+  },
+  
 
   Model: UserModel
 

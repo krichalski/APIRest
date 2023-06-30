@@ -1,5 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../helpers/bd");
+const MissionDAO = require("../model/Mission");
+
 
 const CharModel = sequelize.define("Characters", {
   id: {
@@ -61,7 +63,36 @@ module.exports = {
   getByName: async function (name) {
     return await CharModel.findOne({ where: { name: name } });
   },
+  quest: async function (name, missionName) {
+    const character = await CharModel.findOne({ where: { name: name } })
+    if (!character) {
+      return "Personagem não encontrado"
+    }
 
+    try {
+      const mission = await MissionDAO.getByName(missionName)
+      if (!mission) {
+        return "Missão não encontrada"
+      }
+
+      let result = "";
+      if (character.nivel >= mission.nivelDificuldade) {
+        result = "Seu herói completou a missão";
+      } else {
+        result = "Seu herói falhou";
+      }
+
+      const response = {
+        result: result,
+        descricao: mission.descricao,
+      };
+
+      return response;
+    } catch (error) {
+      console.error(error);
+      throw new Error("Erro ao processar a requisição");
+    }
+  },
   Model: CharModel    
  
 };

@@ -19,12 +19,12 @@ router.get('/', async (req, res) => {
 
   let users = [
     { login: "admin", password: "admin", isAdmin: true},
-    { login: "user1", password: "password2", isAdmin: false},
+    { login: "user1", password: "password2", isAdmin: false },
     { login: "user2", password: "password2", isAdmin: false },
     { login: "user3", password: "password3", isAdmin: false },
-    { login: "user4", password: "password4", isAdmin: false },
-    { login: "user5", password: "password5", isAdmin: false },
-    { login: "user6", password: "password6", isAdmin: false }
+    { login: "user4", password: "password4", isAdmin: false  },
+    { login: "user5", password: "password5", isAdmin: false  },
+    { login: "user6", password: "password6", isAdmin: false  }
   ];
   
 
@@ -66,8 +66,8 @@ router.get('/', async (req, res) => {
   try {
     let createdUsers = [];
     for (let i = 0; i < users.length; i++) {
-      let { login, password, isAdmin } = users[i];
-      let createdUser = await UserModel.save(login, password, isAdmin);
+      let { login, password, isAdmin, contador } = users[i];
+      let createdUser = await UserModel.save(login, password, isAdmin, contador);
       createdUsers.push(createdUser);
     }
 
